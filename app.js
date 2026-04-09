@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // API Core
-    const API_KEY = "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";
+    const API_KEY = "YOUR_API_KEY_HERE";
     const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 
@@ -377,7 +377,7 @@ Monitoring Protocol`;
                     'X-Title': 'MedGuide AI Prototype'
                 },
                 body: JSON.stringify({
-                    "model": "openai/gpt-oss-120b:free",
+                    "model": "anthropic/claude-3-haiku",
                     "messages": [
                         {
                             "role": "user",
