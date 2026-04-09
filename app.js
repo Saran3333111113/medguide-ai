@@ -377,7 +377,7 @@ Monitoring Protocol`;
                     'X-Title': 'MedGuide AI Prototype'
                 },
                 body: JSON.stringify({
-                    "model": "anthropic/claude-3-haiku",
+                    "model": "openai/gpt-oss-120b:free",
                     "messages": [
                         {
                             "role": "user",
