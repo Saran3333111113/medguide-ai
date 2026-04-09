@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedGuide AI - Healthcare Decision Support</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Meta tags for SEO -->
+    <meta name="description"
+        content="MedGuide AI provides intelligent healthcare decision-support and personalized treatment plans">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Header -->
+        <header class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <h1>MedGuide AI</h1>
+            </div>
+
+            <div class="global-controls">
+                <button type="button" id="theme-toggle-btn" class="btn-secondary" style="margin-right: 1rem;">
+                    <span id="theme-icon">🌙</span> <span id="theme-text">Dark Mode</span>
+                </button>
+                <div class="mode-toggle">
+                    <span class="mode-label">Text</span>
+                    <label class="switch">
+                        <input type="checkbox" id="mode-toggle-checkbox">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="mode-label">Voice</span>
+                </div>
+
+
+            </div>
+        </header>
+
+        <!-- Main Content Layout -->
+        <main class="main-content">
+            <!-- Input Form Panel -->
+            <section class="panel input-panel glass-panel">
+                <h2>Patient Profile</h2>
+                <form id="patient-form">
+                    <!-- Text Mode Container -->
+                    <div id="text-mode-container">
+                        <div class="form-group row">
+                            <div class="col">
+                                <label for="age">Age</label>
+                                <input type="number" id="age" placeholder="e.g., 45">
+                            </div>
+                            <div class="col">
+                                <label for="gender">Gender</label>
+                                <select id="gender">
+                                    <option value="" disabled selected>Select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="disease">Disease / Primary Complaint</label>
+                            <input type="text" id="disease" placeholder="e.g., Type 2 Diabetes">
+                        </div>
+                        <div class="form-group">
+                            <label for="medical_history">Medical History</label>
+                            <textarea id="medical_history" rows="3"
+                                placeholder="Outline prior conditions, surgeries, family history..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="medications">Current Medications (Comma separated)</label>
+                            <textarea id="medications" rows="2"
+                                placeholder="e.g., Aspirin, Lisinopril, Metformin"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="genetic_markers">Genetic Markers</label>
+                            <textarea id="genetic_markers" rows="2"
+                                placeholder="Relevant genetic variants..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Voice Mode Container -->
+                    <div id="voice-mode-container" class="hidden">
+                        <div class="dictation-wrapper">
+                            <button type="button" id="mic-btn" class="btn-mic">
+                                <i class="fa-solid fa-microphone"></i>
+                            </button>
+                            <span id="mic-status" class="mic-status">Click mic to start dictating...</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="dictation_notes">Dictated Context</label>
+                            <textarea id="dictation_notes" rows="12"
+                                placeholder="Start speaking to dictate patient characteristics, medical history, and medications here..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-actions" style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <button type="submit" id="analyze-btn" class="btn-primary" style="flex: 2; margin-top: 0;">
+                            <i class="fa-solid fa-microchip"></i> Analyze Patient
+                        </button>
+                        <button type="button" id="load-example-btn" class="btn-secondary" style="flex: 1;">
+                            <i class="fa-solid fa-vial"></i> Load Example Case
+                        </button>
+                        <button type="button" id="reset-btn" class="btn-secondary"
+                            style="flex: 1; border-color: rgba(239, 68, 68, 0.5); color: var(--danger);">
+                            <i class="fa-solid fa-trash-can"></i> Reset Form
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Output Panel -->
+            <section class="panel output-panel">
+                <!-- Empty state initially -->
+                <div id="empty-state" class="empty-state glass-panel">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <h3>Awaiting Patient Data</h3>
+                    <p>Enter patient details and click analyze to generate a personalized treatment plan.</p>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loading-state" class="loading-state glass-panel hidden">
+                    <div class="spinner"></div>
+                    <h3>AI analyzing patient data...</h3>
+                    <p>Generating personalized recommendations and detecting interactions.</p>
+                </div>
+
+                <!-- Results State -->
+                <div id="results-state" class="results-state hidden">
+                    <!-- Action Bar -->
+                    <div class="action-bar">
+                        <button id="speak-results-btn" class="btn-secondary hidden">
+                            <i class="fa-solid fa-volume-high"></i> <span id="speak-btn-text">Speak Results</span>
+                        </button>
+                        <button id="download-pdf-btn" class="btn-secondary hidden">
+                            <i class="fa-solid fa-file-pdf"></i> Download PDF Report
+                        </button>
+                    </div>
+
+                    <!-- Patient Overview Card added per request -->
+                    <div class="result-card glass-panel" id="card-overview" style="margin-bottom: 2rem;">
+                        <div class="card-header">
+                            <h3>📋 Patient Overview</h3>
+                        </div>
+                        <div class="card-content" id="content-overview">
+                            <p style="margin-bottom: 0.5rem;"><strong>Age:</strong> <span id="overview-age">-</span> |
+                                <strong>Gender:</strong> <span id="overview-gender">-</span>
+                            </p>
+                            <p style="margin-bottom: 0.5rem;"><strong>Disease / Primary Complaint:</strong> <span
+                                    id="overview-disease">-</span></p>
+                            <p style="margin-bottom: 0.5rem;"><strong>Current Medications:</strong> <span
+                                    id="overview-meds">-</span></p>
+                            <p style="margin-bottom: 0;"><strong>Calculated Risk Score:</strong> <span
+                                    id="overview-risk">-</span></p>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title">Analysis & Treatment Plan</h2>
+
+                    <!-- Risk Score Visualization -->
+                    <div class="risk-score-container glass-panel" id="risk-score-container">
+                        <div class="risk-header">
+                            <h3>Calculated Patient Risk Level</h3>
+                            <span id="risk-score-badge" class="risk-badge">Calculating...</span>
+                        </div>
+                        <div class="risk-bar-bg">
+                            <div class="risk-bar-fill" id="risk-bar-fill"></div>
+                        </div>
+                        <p id="risk-score-text" class="text-muted small"></p>
+                    </div>
+
+                    <div class="result-card glass-panel" id="card-risk">
+                        <div class="card-header">
+                            <h3>🧬 Patient Risk Analysis</h3>
+                        </div>
+                        <div class="card-content" id="content-risk"></div>
+                    </div>
+
+                    <div class="result-card glass-panel" id="card-treatment">
+                        <div class="card-header">
+                            <h3>💊 Treatment Recommendation</h3>
+                        </div>
+                        <div class="card-content" id="content-treatment"></div>
+                    </div>
+
+                    <div class="result-card glass-panel" id="card-interaction">
+                        <div class="card-header">
+                            <h3>⚠ Drug Interaction Warnings</h3>
+                        </div>
+                        <div class="card-content" id="content-interaction"></div>
+                    </div>
+
+                    <div class="result-card glass-panel" id="card-outcome">
+                        <div class="card-header">
+                            <h3>📈 Outcome Prediction</h3>
+                        </div>
+                        <div class="card-content" id="content-outcome"></div>
+                    </div>
+
+                    <div class="result-card glass-panel" id="card-monitoring">
+                        <div class="card-header">
+                            <h3>🩺 Monitoring Protocol</h3>
+                        </div>
+                        <div class="card-content" id="content-monitoring"></div>
+                    </div>
+
+                    <!-- Ask AI a Question Block -->
+                    <div class="result-card glass-panel" id="ask-ai-container" style="margin-top: 2rem;">
+                        <div class="card-header">
+                            <h3>🤖 Ask AI about this Report</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group row" style="align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                <div class="col" style="flex: 3;">
+                                    <label for="ai-question-input" class="hidden">Ask a question</label>
+                                    <input type="text" id="ai-question-input" style="margin-bottom: 0;" placeholder="Ask a question about this patient's treatment plan...">
+                                </div>
+                                <div class="col" style="flex: 1;">
+                                    <button type="button" id="ask-ai-btn" class="btn-primary" style="margin-top: 0; height: 100%; padding: 0.75rem;">
+                                        <i class="fa-solid fa-comment-medical"></i> Ask AI
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="ask-ai-status" class="text-info small hidden" style="margin-bottom: 1rem; font-weight: 600;"><i class="fa-solid fa-spinner fa-spin"></i> AI analyzing your question...</div>
+                            <div id="ask-ai-response" class="hidden" style="padding: 1rem; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.95rem;"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- marked.js for safe markdown rendering to HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
